@@ -1,0 +1,442 @@
+import flet as ft
+import asyncio
+from datetime import datetime
+from back import lab_ai_response
+
+chat_history = []
+
+def setup_drawer(page: ft.Page):
+    # Drawer navigation functions
+    def nav_home(e):
+        home(page)
+        page.drawer.open = False
+        page.update()
+
+    def nav_history(e):
+        history_screen(page)
+        page.drawer.open = False
+        page.update()
+
+    def nav_contact(e):
+        contact_screen(page)
+        page.drawer.open = False
+        page.update()
+
+    def nav_about(e):
+        about_screen(page)
+        page.drawer.open = False
+        page.update()
+
+    # Drawer
+    page.drawer = ft.NavigationDrawer(
+        controls=[
+            ft.Text("AI LabMate", size=20, weight="bold"),
+            ft.Divider(),
+            ft.ListTile(title=ft.Text("New Chat"), leading=ft.Icon(ft.Icons.MESSAGE, color=ft.Colors.BLUE),
+                        on_click=nav_home),
+            ft.ListTile(title=ft.Text("Chat History"), leading=ft.Icon(ft.Icons.HISTORY, color=ft.Colors.GREEN),
+                        on_click=nav_history),
+            ft.ListTile(title=ft.Text("Contact Us"), leading=ft.Icon(ft.Icons.CONTACT_PAGE, color=ft.Colors.ORANGE),
+                        on_click=nav_contact),
+            ft.ListTile(title=ft.Text("About"), leading=ft.Icon(ft.Icons.INFO_OUTLINE, color=ft.Colors.PURPLE),
+                        on_click=nav_about),
+        ]
+    )
+
+def splash(page: ft.Page):
+    page.controls.clear()
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+    page.add(
+        ft.Container(
+            expand=True,
+            alignment=ft.alignment.center,
+            content=ft.Column(
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=15,
+                controls=[
+                    ft.Container(
+                        width=120,
+                        height=120,
+                        border_radius=60,
+                        bgcolor=ft.Colors.BLUE,
+                        alignment=ft.alignment.center,
+                        content=ft.Icon(ft.Icons.CHAT, size=64, color=ft.Colors.WHITE),
+                    ),
+                    ft.Text("LAB MATE", size=26, weight=ft.FontWeight.BOLD),
+                    ft.Text("Powered by AI", size=12, color=ft.Colors.BLUE_GREY),
+                    ft.ProgressRing(),
+                ],
+            ),
+        )
+    )
+    page.update()
+
+
+
+# ---------------- ABOUT ----------------
+def about_screen(page: ft.Page):
+    setup_drawer(page)
+    page.controls.clear()
+    page.add(
+        ft.Container(
+            expand=True,
+            padding=20,
+            content=ft.Column(
+                spacing=10,
+                controls=[
+                    ft.Text("AI LabMate", size=26, weight="bold"),
+                    ft.Text("Your Smart Computer Science Lab Assistant"),
+                    ft.Divider(),
+
+                    ft.Text("📌 App Usage", weight="bold"),
+                    ft.Text(
+                        "AI LabMate helps students understand and complete "
+                        "Computer Science lab experiments, programs, algorithms, "
+                        "and viva questions using AI-powered explanations."
+                    ),
+
+                    ft.Text("✨ Features", weight="bold"),
+                    ft.Text("• Lab experiment guidance"),
+                    ft.Text("• AI-based doubt solving"),
+                    ft.Text("• Chat history"),
+                    ft.Text("• Drawing / rough work canvas"),
+                    ft.Text("• Simple & student-friendly UI"),
+
+                    ft.Divider(),
+                    ft.Text("👨‍💻 Developer", weight="bold"),
+                    ft.Text("Name: Sri"),
+                    ft.Text("Role: Student Developer"),
+                    ft.Text("Tech Stack: Python, Flet, AI"),
+                    ft.Text("Made with ❤️ for students"),
+                ],
+            ),
+        )
+    )
+    page.update()
+
+
+# ---------------- CONTACT ----------------
+def contact_screen(page):
+    setup_drawer(page)
+    page.controls.clear()
+    page.add(
+        ft.Container(
+            expand=True,
+            padding=20,
+            content=ft.Column(
+                spacing=10,
+                controls=[
+                    ft.Text("Contact & Help", size=26, weight="bold"),
+                    ft.Text("We're here to help students get the most from AI LabMate."),
+                    ft.Divider(),
+
+                    ft.Text("📧 Email", weight="bold"),
+                    ft.Text("For bug reports or detailed queries: support@labmate.example.com"),
+
+                    ft.Text("💬 Social", weight="bold"),
+                    ft.Text("Follow for updates: Instagram: @ailabmate | Twitter: @ailabmate"),
+
+                    ft.Text("❓ Help & FAQ", weight="bold"),
+                    ft.Text(
+                        "If the AI gives an incorrect answer, try rephrasing your question or "
+                        "asking for step-by-step clarification. For local model issues, install the"
+                        " required packages listed in the app README."
+                    ),
+
+                    ft.Text("🛠️ Developer", weight="bold"),
+                    ft.Text("Name: Sri — Student Developer"),
+                    ft.Text("Tech Stack: Python, Flet, HuggingFace / OpenAI (optional)"),
+
+                    ft.Divider(),
+                    ft.Row(
+                        controls=[
+                            ft.Button("Report a Bug", on_click=lambda e: page.launch_url("mailto:support@labmate.example.com")),
+                            ft.Button("Project Repo", on_click=lambda e: page.launch_url("https://github.com/your-repo")),
+                        ],
+                        alignment=ft.MainAxisAlignment.START,
+                    ),
+                ],
+            ),
+        )
+    )
+    page.update()
+
+
+# ---------------- HISTORY ----------------
+def history_screen(page):
+    setup_drawer(page)
+    page.controls.clear()
+
+    items = []
+    for h in chat_history:
+        items.append(
+            ft.ListTile(
+                leading=ft.Icon(ft.Icons.QUESTION_ANSWER, color=ft.Colors.BLUE),
+                title=ft.Text(h["question"]),
+                subtitle=ft.Text(h["time"]),
+            )
+        )
+
+    page.add(
+        ft.Column(
+            expand=True,
+            controls=[
+                ft.Text("Chat History", size=22, weight="bold"),
+                ft.Divider(),
+                ft.Column(items, scroll="adaptive"),
+            ],
+        )
+    )
+    page.update()
+
+
+# ---------------- CANVAS ----------------
+def canvas_screen(page: ft.Page):
+    setup_drawer(page)
+    page.controls.clear()
+    # Fallback drawing implementation that doesn't require `ft.Canvas`.
+    # We use a Stack with Positioned small containers to simulate strokes.
+    shapes = []
+    current_color = ft.Colors.BLACK
+    brush_size = 8
+
+    def pan_update(e: ft.DragUpdateEvent):
+        try:
+            x = int(e.local_x)
+            y = int(e.local_y)
+        except Exception:
+            print("pan_update: couldn't parse coordinates", e.local_x, e.local_y)
+            return
+        # create a small dot at the pointer
+        dot = ft.Positioned(
+            left=x - brush_size // 2,
+            top=y - brush_size // 2,
+            child=ft.Container(
+                width=brush_size,
+                height=brush_size,
+                bgcolor=current_color,
+                border_radius=brush_size,
+            ),
+        )
+        shapes.append(dot)
+        stack.controls.append(dot)
+        page.update()
+
+    def pan_end(e: ft.DragEndEvent):
+        pass
+
+    def set_color(e):
+        nonlocal current_color
+        current_color = e.control.data
+
+    def clear_canvas(e):
+        shapes.clear()
+        stack.controls.clear()
+        page.update()
+
+    stack = ft.Stack(expand=True, controls=[])
+
+    draw_area = ft.GestureDetector(
+        on_pan_update=pan_update,
+        on_pan_end=pan_end,
+        content=ft.Container(
+            expand=True,
+            bgcolor=ft.Colors.WHITE,
+            border=ft.border.all(1),
+            content=stack,
+        ),
+    )
+
+    page.add(
+        ft.Column(
+            expand=True,
+            controls=[
+                ft.Text("Drawing Board 🎨", size=20, weight="bold"),
+                ft.Row(
+                    controls=[
+                        ft.IconButton(ft.Icons.CIRCLE, icon_color=ft.Colors.BLACK, data=ft.Colors.BLACK, on_click=set_color),
+                        ft.IconButton(ft.Icons.CIRCLE, icon_color=ft.Colors.RED, data=ft.Colors.RED, on_click=set_color),
+                        ft.IconButton(ft.Icons.CIRCLE, icon_color=ft.Colors.BLUE, data=ft.Colors.BLUE, on_click=set_color),
+                        ft.IconButton(ft.Icons.CIRCLE, icon_color=ft.Colors.GREEN, data=ft.Colors.GREEN, on_click=set_color),
+                        ft.IconButton(ft.Icons.DELETE, on_click=clear_canvas),
+                    ]
+                ),
+                draw_area,
+            ],
+        )
+    )
+    page.update()
+
+
+# ---------------- HOME ----------------
+def home(page: ft.Page):
+    page.controls.clear()
+    page.title = "AI LABMATE"
+    page.theme_mode = ft.ThemeMode.LIGHT
+
+    async def type_anim(text, msg):
+        msg.value = ""
+        for ch in text:
+            msg.value += ch
+            page.update()
+            await asyncio.sleep(0.02)
+
+    async def send(e):
+        if not user_input.value.strip():
+            return
+
+        user_query = user_input.value
+        quote.visible = False
+
+        chat.controls.append(
+            ft.Row(
+                [ft.Container(expand=True),
+                 ft.Container(
+                     content=ft.Text(user_input.value, color="white"),
+                     bgcolor="#6366F1",
+                     padding=10,
+                     border_radius=12,
+                 )]
+            )
+        )
+
+        bot_text = ft.Text()
+        chat.controls.append(
+            ft.Row(
+                [ft.Container(
+                    content=bot_text,
+                    bgcolor="#F3F4F6",
+                    padding=10,
+                    border_radius=12,
+                ), ft.Container(expand=True)]
+            )
+        )
+
+        chat_history.append({
+            "question": user_input.value,
+            "time": datetime.now().strftime("%H:%M")
+        })
+
+        user_input.value = ""
+        page.update()
+
+        try:
+            ai_response = await asyncio.to_thread(lab_ai_response, user_query)
+            await type_anim(ai_response, bot_text)
+        except Exception as error:
+            await type_anim(f"Error: {str(error)}", bot_text)
+
+    quote = ft.Container(
+        content=ft.Column(
+            [
+                ft.Icon(ft.Icons.LIGHTBULB, size=50, color="#6366F1"),
+                ft.Text("Learning becomes easy with the right guide.", italic=True),
+            ],
+            horizontal_alignment="center",
+        ),
+        alignment=ft.alignment.center,
+        visible=True,
+    )
+
+    chat = ft.Column(scroll="adaptive", spacing=10)
+
+    user_input = ft.TextField(hint_text="Ask your lab question...", expand=True, on_submit=lambda e: page.run_task(send, e))
+    send_btn = ft.IconButton(
+        icon=ft.Icons.ARROW_FORWARD,
+        on_click=lambda e: page.run_task(send, e)
+    )
+
+    # Drawer navigation functions
+    def nav_home(e):
+        home(page)
+        page.drawer.open = False
+        page.update()
+    
+    def nav_history(e):
+        history_screen(page)
+        page.drawer.open = False
+        page.update()
+    
+    def nav_contact(e):
+        contact_screen(page)
+        page.drawer.open = False
+        page.update()
+    
+    def nav_about(e):
+        about_screen(page)
+        page.drawer.open = False
+        page.update()
+
+    # Drawer
+    page.drawer = ft.NavigationDrawer(
+        controls=[
+            ft.Text("AI LabMate", size=20, weight="bold"),
+            ft.Divider(),
+            ft.ListTile(title=ft.Text("New Chat"), leading=ft.Icon(ft.Icons.CHAT),
+                        on_click=nav_home),
+            ft.ListTile(title=ft.Text("Chat History"), leading=ft.Icon(ft.Icons.HISTORY),
+                        on_click=nav_history),
+            ft.ListTile(title=ft.Text("Contact Us"), leading=ft.Icon(ft.Icons.CONTACT_MAIL),
+                        on_click=nav_contact),
+            ft.ListTile(title=ft.Text("About"), leading=ft.Icon(ft.Icons.INFO),
+                        on_click=nav_about),
+        ]
+    )
+
+    page.appbar = ft.AppBar(
+        leading=ft.IconButton(
+            ft.Icons.MENU,
+            on_click=lambda e: setattr(page.drawer, "open", True)
+        ),
+        title=ft.Text("AI LabMate"),
+        center_title=True,
+    )
+
+    def nav_change(e):
+        if e.control.selected_index == 0:
+            home(page)
+        elif e.control.selected_index == 1:
+            about_screen(page)
+        elif e.control.selected_index == 2:
+            canvas_screen(page)
+
+    page.navigation_bar = ft.NavigationBar(
+        on_change=nav_change,
+        destinations=[
+            ft.NavigationBarDestination(icon=ft.Icons.HOME, label="Home"),
+            ft.NavigationBarDestination(icon=ft.Icons.INFO, label="About"),
+            ft.NavigationBarDestination(icon=ft.Icons.BRUSH, label="Brush"),
+        ],
+    )
+
+    page.add(
+        ft.Column(
+            expand=True,
+            controls=[
+                quote,
+                ft.Column(expand=True, controls=[chat], scroll="adaptive"),
+                ft.Divider(height=1),
+                ft.Row([user_input, send_btn], spacing=8),
+            ],
+        )
+    )
+
+    page.update()
+
+
+# ---------------- APP ----------------
+async def app(page: ft.Page):
+    splash(page)
+    await asyncio.sleep(3)
+    home(page)
+
+
+def main(page: ft.Page):
+    page.run_task(app, page)
+
+
+if __name__ == "__main__":
+    ft.app(target=main, view=ft.AppView.FLET_APP)
