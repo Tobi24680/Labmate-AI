@@ -6,31 +6,31 @@ from back import lab_ai_response
 chat_history = []
 
 def setup_drawer(page: ft.Page):
-    # Drawer navigation functions
+    
     def nav_home(e):
         home(page)
-        page.drawer.open = False
+        page.drawer.open=False
         page.update()
 
     def nav_history(e):
         history_screen(page)
-        page.drawer.open = False
+        page.drawer.open=False
         page.update()
 
     def nav_contact(e):
         contact_screen(page)
-        page.drawer.open = False
+        page.drawer.open=False
         page.update()
 
     def nav_about(e):
         about_screen(page)
-        page.drawer.open = False
+        page.drawer.open=False
         page.update()
 
-    # Drawer
-    page.drawer = ft.NavigationDrawer(
+    
+    page.drawer=ft.NavigationDrawer(
         controls=[
-            ft.Text("AI LabMate", size=20, weight="bold"),
+            ft.Text("AI LabMate...", size=25, weight="bold"),
             ft.Divider(),
             ft.ListTile(title=ft.Text("New Chat"), leading=ft.Icon(ft.Icons.MESSAGE, color=ft.Colors.BLUE),
                         on_click=nav_home),
@@ -38,15 +38,15 @@ def setup_drawer(page: ft.Page):
                         on_click=nav_history),
             ft.ListTile(title=ft.Text("Contact Us"), leading=ft.Icon(ft.Icons.CONTACT_PAGE, color=ft.Colors.ORANGE),
                         on_click=nav_contact),
-            ft.ListTile(title=ft.Text("About"), leading=ft.Icon(ft.Icons.INFO_OUTLINE, color=ft.Colors.PURPLE),
+            ft.ListTile(title=ft.Text("About App"), leading=ft.Icon(ft.Icons.INFO_OUTLINE, color=ft.Colors.PURPLE),
                         on_click=nav_about),
         ]
     )
 
 def splash(page: ft.Page):
     page.controls.clear()
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.vertical_alignment=ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment=ft.CrossAxisAlignment.CENTER
 
     page.add(
         ft.Container(
@@ -74,9 +74,6 @@ def splash(page: ft.Page):
     )
     page.update()
 
-
-
-# ---------------- ABOUT ----------------
 def about_screen(page: ft.Page):
     setup_drawer(page)
     page.controls.clear()
@@ -88,14 +85,14 @@ def about_screen(page: ft.Page):
                 spacing=10,
                 controls=[
                     ft.Text("AI LabMate", size=26, weight="bold"),
-                    ft.Text("Your Smart Computer Science Lab Assistant"),
+                    ft.Text("Your Smart Offline AI Lab Assistant Here."),
                     ft.Divider(),
 
                     ft.Text("📌 App Usage", weight="bold"),
                     ft.Text(
                         "AI LabMate helps students understand and complete "
-                        "Computer Science lab experiments, programs, algorithms, "
-                        "and viva questions using AI-powered explanations."
+                        "Computer Science students lab experiments, programs, algorithms, "
+                        "and viva questions using AI-powered explanations ect..."
                     ),
 
                     ft.Text("✨ Features", weight="bold"),
@@ -104,13 +101,12 @@ def about_screen(page: ft.Page):
                     ft.Text("• Chat history"),
                     ft.Text("• Drawing / rough work canvas"),
                     ft.Text("• Simple & student-friendly UI"),
+                    ft.Text("• Offline App"),
 
                     ft.Divider(),
                     ft.Text("👨‍💻 Developer", weight="bold"),
-                    ft.Text("Name: Sri"),
-                    ft.Text("Role: Student Developer"),
-                    ft.Text("Tech Stack: Python, Flet, AI"),
-                    ft.Text("Made with ❤️ for students"),
+                    ft.Text("Name: SHREERAM M K"),
+                    ft.Text("Tech Stack: Python, Flet, LLM"),
                 ],
             ),
         )
@@ -118,7 +114,6 @@ def about_screen(page: ft.Page):
     page.update()
 
 
-# ---------------- CONTACT ----------------
 def contact_screen(page):
     setup_drawer(page)
     page.controls.clear()
@@ -134,10 +129,10 @@ def contact_screen(page):
                     ft.Divider(),
 
                     ft.Text("📧 Email", weight="bold"),
-                    ft.Text("For bug reports or detailed queries: support@labmate.example.com"),
+                    ft.Text("For bug reports or detailed queries: sumathidevan2006@gmail.com"),
 
                     ft.Text("💬 Social", weight="bold"),
-                    ft.Text("Follow for updates: Instagram: @ailabmate | Twitter: @ailabmate"),
+                    ft.Text("Follow for updates: GITHUB: Tobi24680 | X: @ailabmate"),
 
                     ft.Text("❓ Help & FAQ", weight="bold"),
                     ft.Text(
@@ -146,15 +141,15 @@ def contact_screen(page):
                         " required packages listed in the app README."
                     ),
 
-                    ft.Text("🛠️ Developer", weight="bold"),
-                    ft.Text("Name: Sri — Student Developer"),
+                    ft.Text("🛠️ Developed by", weight="bold"),
+                    ft.Text("Name: Tobi24680"),
                     ft.Text("Tech Stack: Python, Flet, HuggingFace / OpenAI (optional)"),
 
                     ft.Divider(),
                     ft.Row(
                         controls=[
-                            ft.Button("Report a Bug", on_click=lambda e: page.launch_url("mailto:support@labmate.example.com")),
-                            ft.Button("Project Repo", on_click=lambda e: page.launch_url("https://github.com/your-repo")),
+                            ft.Button("Report a Bug", on_click=lambda e: page.launch_url("sumathidevan2006@gmail.com")),
+                            ft.Button("Project Repo", on_click=lambda e: page.launch_url("https://github.com/Tobi24680")),
                         ],
                         alignment=ft.MainAxisAlignment.START,
                     ),
@@ -165,7 +160,6 @@ def contact_screen(page):
     page.update()
 
 
-# ---------------- HISTORY ----------------
 def history_screen(page):
     setup_drawer(page)
     page.controls.clear()
@@ -193,12 +187,9 @@ def history_screen(page):
     page.update()
 
 
-# ---------------- CANVAS ----------------
-def canvas_screen(page: ft.Page):
+def canvas_screen(page: ft.Page):  
     setup_drawer(page)
     page.controls.clear()
-    # Fallback drawing implementation that doesn't require `ft.Canvas`.
-    # We use a Stack with Positioned small containers to simulate strokes.
     shapes = []
     current_color = ft.Colors.BLACK
     brush_size = 8
@@ -210,7 +201,7 @@ def canvas_screen(page: ft.Page):
         except Exception:
             print("pan_update: couldn't parse coordinates", e.local_x, e.local_y)
             return
-        # create a small dot at the pointer
+        
         dot = ft.Positioned(
             left=x - brush_size // 2,
             top=y - brush_size // 2,
@@ -270,8 +261,6 @@ def canvas_screen(page: ft.Page):
     )
     page.update()
 
-
-# ---------------- HOME ----------------
 def home(page: ft.Page):
     page.controls.clear()
     page.title = "AI LABMATE"
@@ -349,7 +338,7 @@ def home(page: ft.Page):
         on_click=lambda e: page.run_task(send, e)
     )
 
-    # Drawer navigation functions
+
     def nav_home(e):
         home(page)
         page.drawer.open = False
@@ -370,7 +359,7 @@ def home(page: ft.Page):
         page.drawer.open = False
         page.update()
 
-    # Drawer
+    
     page.drawer = ft.NavigationDrawer(
         controls=[
             ft.Text("AI LabMate", size=20, weight="bold"),
@@ -426,8 +415,6 @@ def home(page: ft.Page):
 
     page.update()
 
-
-# ---------------- APP ----------------
 async def app(page: ft.Page):
     splash(page)
     await asyncio.sleep(3)

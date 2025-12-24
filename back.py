@@ -1,28 +1,34 @@
-import subprocess
-import os
+from langchain_community.chat_models import ChatOllama
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
-# Optional: full path to Ollama executable if not in PATH
-OLLAMA_CLI = r"C:\Users\SRIMATHI\AppData\Local\Programs\Ollama\ollama.exe"  # or r"C:\Users\YourUser\ollama.exe"
+OLLAMA_MODEL = "qwen2.5:1.5b"
 
-OLLAMA_MODEL = "qwen2.5:1.5b"  # your model
+llm = ChatOllama(
+    model=OLLAMA_MODEL,
+    temperature=0.2,  
+    timeout=60
+)
 
-def lab_ai_response(prompt: str) -> str:
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are a study assistant for computer science students. "
+            "Explain concepts in simple words. "
+            "Use step-by-step explanations. "
+            "Give small examples when helpful. "
+            "Avoid unnecessary complexity."
+        ),
+        ("human", "{question}")
+    ]
+)
+
+chain = prompt | llm | StrOutputParser()
+
+
+def lab_ai_response(question: str) -> str:
     try:
-        result = subprocess.run(
-            [OLLAMA_CLI, "run", OLLAMA_MODEL, prompt],
-            capture_output=True,
-            text=True,
-            timeout=60
-        )
-
-        if result.returncode != 0:
-            return f"❌ Ollama error: {result.stderr.strip() or 'Unknown error'}"
-
-        return result.stdout.strip() or "⚠️ Ollama returned no response."
-
-    except FileNotFoundError:
-        return "❌ Ollama CLI not found. Make sure it's installed and in PATH."
-    except subprocess.TimeoutExpired:
-        return "⚠️ AI took too long to respond."
+        return chain.invoke({"question": question}).strip()
     except Exception as e:
-        return f"❌ Unexpected error: {str(e)}"
+        return f"❌ Error: {e}"
