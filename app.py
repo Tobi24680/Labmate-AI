@@ -271,21 +271,26 @@ def home(page: ft.Page):
         thinking_row = ft.Row([thinking_indicator, ft.Container(expand=True)])
         chat.controls.append(thinking_row)
 
-        chat_history.append({
-            "question": user_input.value,
-            "time": datetime.now().strftime("%H:%M")
-        })
-
         user_input.value = ""
+
         page.update()
+
+        ai_response = None
 
         try:
             ai_response = await asyncio.to_thread(lab_ai_response, user_query)
             thinking_indicator.content = bot_text
             await type_anim(ai_response, bot_text)
         except Exception as error:
+            ai_response = f"Error: {str(error)}"
             thinking_indicator.content = bot_text
-            await type_anim(f"Error: {str(error)}", bot_text)
+            await type_anim(ai_response, bot_text)
+
+        chat_history.append({
+            "question": user_query,
+            "response": ai_response,
+            "time": datetime.now().strftime("%H:%M")
+        })
 
     quote = ft.Container(
         content=ft.Column(
@@ -307,8 +312,32 @@ def home(page: ft.Page):
         on_click=lambda e: page.run_task(send, e)
     )
 
+    quote.visible = len(chat_history) == 0
 
-
+    if chat_history:
+        for h in chat_history:
+            chat.controls.append(
+                ft.Row(
+                    [ft.Container(expand=True),
+                     ft.Container(
+                         content=ft.Text(h["question"], color="white"),
+                         bgcolor="#6366F1",
+                         padding=10,
+                         border_radius=12,
+                     )]
+                )
+            )
+            bot_text = ft.Text(h["response"])
+            chat.controls.append(
+                ft.Row(
+                    [ft.Container(
+                         content=bot_text,
+                         bgcolor="#F3F4F6",
+                         padding=10,
+                         border_radius=12,
+                     ), ft.Container(expand=True)]
+                )
+            )
 
     page.appbar = ft.AppBar(
         leading=ft.IconButton(

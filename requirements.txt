@@ -1,0 +1,6 @@
+python
+flet
+langchain-community
+langchain-core
+ollama 
+
