@@ -187,81 +187,50 @@ def history_screen(page):
     page.update()
 
 
-def canvas_screen(page: ft.Page):  
+def help_screen(page: ft.Page):
     setup_drawer(page)
     page.controls.clear()
-    shapes = []
-    current_color = ft.Colors.BLACK
-    brush_size = 8
-
-    def pan_update(e: ft.DragUpdateEvent):
-        try:
-            x = int(e.local_x)
-            y = int(e.local_y)
-        except Exception:
-            print("pan_update: couldn't parse coordinates", e.local_x, e.local_y)
-            return
-        
-        dot = ft.Positioned(
-            left=x - brush_size // 2,
-            top=y - brush_size // 2,
-            child=ft.Container(
-                width=brush_size,
-                height=brush_size,
-                bgcolor=current_color,
-                border_radius=brush_size,
-            ),
-        )
-        shapes.append(dot)
-        stack.controls.append(dot)
-        page.update()
-
-    def pan_end(e: ft.DragEndEvent):
-        pass
-
-    def set_color(e):
-        nonlocal current_color
-        current_color = e.control.data
-
-    def clear_canvas(e):
-        shapes.clear()
-        stack.controls.clear()
-        page.update()
-
-    stack = ft.Stack(expand=True, controls=[])
-
-    draw_area = ft.GestureDetector(
-        on_pan_update=pan_update,
-        on_pan_end=pan_end,
-        content=ft.Container(
-            expand=True,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.border.all(1),
-            content=stack,
-        ),
-    )
-
     page.add(
-        ft.Column(
+        ft.Container(
             expand=True,
-            controls=[
-                ft.Text("Drawing Board 🎨", size=20, weight="bold"),
-                ft.Row(
-                    controls=[
-                        ft.IconButton(ft.Icons.CIRCLE, icon_color=ft.Colors.BLACK, data=ft.Colors.BLACK, on_click=set_color),
-                        ft.IconButton(ft.Icons.CIRCLE, icon_color=ft.Colors.RED, data=ft.Colors.RED, on_click=set_color),
-                        ft.IconButton(ft.Icons.CIRCLE, icon_color=ft.Colors.BLUE, data=ft.Colors.BLUE, on_click=set_color),
-                        ft.IconButton(ft.Icons.CIRCLE, icon_color=ft.Colors.GREEN, data=ft.Colors.GREEN, on_click=set_color),
-                        ft.IconButton(ft.Icons.DELETE, on_click=clear_canvas),
-                    ]
-                ),
-                draw_area,
-            ],
+            padding=20,
+            content=ft.Column(
+                spacing=10,
+                controls=[
+                    ft.Text("Help & Guide", size=26, weight="bold"),
+                    ft.Text("Get started with AI LabMate - your offline AI lab assistant."),
+                    ft.Divider(),
+
+                    ft.Text("🚀 Step-by-Step Guide", weight="bold"),
+                    ft.Text("1. Launch the App: Open AI LabMate on your device."),
+                    ft.Text("2. Start Chatting: Type your lab question in the input field at the bottom."),
+                    ft.Text("3. Get AI Response: Wait for the AI to provide explanations or guidance."),
+                    ft.Text("4. Access History: Tap the menu icon to view your chat history."),
+                    ft.Text("5. Explore Features: Use the navigation bar to switch between Home, About, and Help."),
+                    ft.Text("6. Contact Support: For issues, use the Contact Us section in the drawer."),
+
+                    ft.Text("💡 Tips", weight="bold"),
+                    ft.Text("• Ask clear, specific questions for better answers."),
+                    ft.Text("• Rephrase if the response isn't helpful."),
+                    ft.Text("• The app works offline for privacy."),
+
+                    ft.Divider(),
+                    ft.Text("📧 Feedback", weight="bold"),
+                    ft.Text("We value your feedback! Share your thoughts or report issues."),
+                    ft.Row(
+                        controls=[
+                            ft.Button("Send Feedback", on_click=lambda e: page.launch_url("mailto:sumathidevan2006@gmail.com?subject=AI LabMate Feedback")),
+                        ],
+                        alignment=ft.MainAxisAlignment.START,
+                    ),
+                ],
+            ),
         )
     )
     page.update()
 
 def home(page: ft.Page):
+    setup_drawer(page)
     page.controls.clear()
     page.title = "AI LABMATE"
     page.theme_mode = ft.ThemeMode.LIGHT
@@ -293,16 +262,14 @@ def home(page: ft.Page):
         )
 
         bot_text = ft.Text()
-        chat.controls.append(
-            ft.Row(
-                [ft.Container(
-                    content=bot_text,
-                    bgcolor="#F3F4F6",
-                    padding=10,
-                    border_radius=12,
-                ), ft.Container(expand=True)]
-            )
+        thinking_indicator = ft.Container(
+            content=ft.Text("Thinking...", size=10, color=ft.Colors.GREY),
+            bgcolor="#F3F4F6",
+            padding=10,
+            border_radius=12,
         )
+        thinking_row = ft.Row([thinking_indicator, ft.Container(expand=True)])
+        chat.controls.append(thinking_row)
 
         chat_history.append({
             "question": user_input.value,
@@ -314,8 +281,10 @@ def home(page: ft.Page):
 
         try:
             ai_response = await asyncio.to_thread(lab_ai_response, user_query)
+            thinking_indicator.content = bot_text
             await type_anim(ai_response, bot_text)
         except Exception as error:
+            thinking_indicator.content = bot_text
             await type_anim(f"Error: {str(error)}", bot_text)
 
     quote = ft.Container(
@@ -339,46 +308,12 @@ def home(page: ft.Page):
     )
 
 
-    def nav_home(e):
-        home(page)
-        page.drawer.open = False
-        page.update()
-    
-    def nav_history(e):
-        history_screen(page)
-        page.drawer.open = False
-        page.update()
-    
-    def nav_contact(e):
-        contact_screen(page)
-        page.drawer.open = False
-        page.update()
-    
-    def nav_about(e):
-        about_screen(page)
-        page.drawer.open = False
-        page.update()
 
-    
-    page.drawer = ft.NavigationDrawer(
-        controls=[
-            ft.Text("AI LabMate", size=20, weight="bold"),
-            ft.Divider(),
-            ft.ListTile(title=ft.Text("New Chat"), leading=ft.Icon(ft.Icons.CHAT),
-                        on_click=nav_home),
-            ft.ListTile(title=ft.Text("Chat History"), leading=ft.Icon(ft.Icons.HISTORY),
-                        on_click=nav_history),
-            ft.ListTile(title=ft.Text("Contact Us"), leading=ft.Icon(ft.Icons.CONTACT_MAIL),
-                        on_click=nav_contact),
-            ft.ListTile(title=ft.Text("About"), leading=ft.Icon(ft.Icons.INFO),
-                        on_click=nav_about),
-        ]
-    )
 
     page.appbar = ft.AppBar(
         leading=ft.IconButton(
             ft.Icons.MENU,
-            on_click=lambda e: setattr(page.drawer, "open", True)
+            on_click=lambda e: (setattr(page.drawer, "open", True), page.update())
         ),
         title=ft.Text("AI LabMate"),
         center_title=True,
@@ -390,14 +325,16 @@ def home(page: ft.Page):
         elif e.control.selected_index == 1:
             about_screen(page)
         elif e.control.selected_index == 2:
-            canvas_screen(page)
+            help_screen(page)
+        page.navigation_bar.selected_index = e.control.selected_index
+        page.update()
 
     page.navigation_bar = ft.NavigationBar(
         on_change=nav_change,
         destinations=[
             ft.NavigationBarDestination(icon=ft.Icons.HOME, label="Home"),
             ft.NavigationBarDestination(icon=ft.Icons.INFO, label="About"),
-            ft.NavigationBarDestination(icon=ft.Icons.BRUSH, label="Brush"),
+            ft.NavigationBarDestination(icon=ft.Icons.HELP, label="Help"),
         ],
     )
 
