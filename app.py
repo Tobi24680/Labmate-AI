@@ -267,6 +267,7 @@ def home(page: ft.Page):
             bgcolor="#F3F4F6",
             padding=10,
             border_radius=12,
+            width=page.width * 0.7,
         )
         thinking_row = ft.Row([thinking_indicator, ft.Container(expand=True)])
         chat.controls.append(thinking_row)
@@ -335,6 +336,7 @@ def home(page: ft.Page):
                          bgcolor="#F3F4F6",
                          padding=10,
                          border_radius=12,
+                         width=page.width * 0.7,
                      ), ft.Container(expand=True)]
                 )
             )

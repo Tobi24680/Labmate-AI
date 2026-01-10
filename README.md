@@ -11,7 +11,24 @@ AI LabMate is an offline AI-powered lab assistant designed specifically for Comp
 - **Simple & Student-Friendly UI**: Easy-to-use interface.
 - **Offline App**: Works without internet for privacy.
 
+## Install
+
+# AI LabMate
+
+Offline AI-powered desktop assistant for Computer Science students.
+
+## Requirements
+- Windows 10+
+- Ollama installed
+
 ## Installation
+1. Install Ollama
+2. Run `ollama pull qwen2.5:1.5b`
+3. Install AI LabMate
+
+## Tech Stack
+Python, Flet, LangChain, Ollama
+
 
 1. Clone the repository:
    ```
